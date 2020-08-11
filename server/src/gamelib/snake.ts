@@ -1,6 +1,6 @@
-import Point, { IPoint } from './point';
+import Point from './point';
 
-class Snake {
+export default class Snake {
   private body: Array<Point>;
   private direction: { x: number, y: number };
 
@@ -9,11 +9,19 @@ class Snake {
     this.direction = this.setInitializeDirection(headCoordinate, tailCoordinate);
   }
 
-  get head() {
+  public get head() {
     return this.body[0];
   }
 
-  private setInitializeDirection(headCoordinate: Point, tailCoordinate: Point) {
+  public get length() {
+    return this.body.length;
+  }
+
+  public update = () => {
+    this.move();
+  }
+
+  private setInitializeDirection = (headCoordinate: Point, tailCoordinate: Point) => {
     const propKey = headCoordinate.x === tailCoordinate.x ? 'y' : 'x';
     const dir = headCoordinate[propKey] < tailCoordinate[propKey] ? -1 : 1;
     return propKey === 'x'
@@ -21,13 +29,13 @@ class Snake {
       : { x: 0, y: dir };
   }
 
-  private createBody(headCoordinate: Point, tailCoordinate: Point) {
+  private createBody = (headCoordinate: Point, tailCoordinate: Point) => {
     // TODO: add logic to create varying length snakes!
     const body: Array<Point> = [headCoordinate, tailCoordinate];
     return body;
   }
 
-  private move() {
+  private move = () => {
     const point = new Point(
       this.head.x + this.direction.x,
       this.head.y + this.direction.y,
@@ -37,12 +45,10 @@ class Snake {
   }
 }
 
-const snake = new Snake(new Point(0, 3), new Point(0, 1));
-
 /**
  * [O][O][O][O][O]
- * [O][O][O][O][H]
- * [O][O][O][O][T]
+ * [X][O][O][O][O]
+ * [X][O][O][O][O]
  * [O][O][O][O][O]
  * [O][O][O][O][O]
  */

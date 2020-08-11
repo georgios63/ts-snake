@@ -1,8 +1,3 @@
-export interface IPoint {
-  x: number,
-  y: number,
-}
-
 export default class Point {
   readonly x: number;
   readonly y: number;
