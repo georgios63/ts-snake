@@ -11,6 +11,7 @@ describe('Player class test suite', () => {
       },
       baseSpeed: 250,
       speedMultiplier: 1,
+      getFruitCoordinate: () => ({ x: 0, y: 0 }),
     });
   });
 
