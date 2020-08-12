@@ -1,5 +1,6 @@
 import Point from './point';
 import Player from './player';
+import events from './event-emitter';
 
 const tickrate = 128;
 
@@ -24,7 +25,7 @@ export default class GameController {
     this.tick();
   }
 
-  private createPlayer = (headCoordinate, tailCoordinate) => new Player({
+  private createPlayer = (headCoordinate: Point, tailCoordinate: Point) => new Player({
     baseSpeed: 500,
     getFruitCoordinate: this.getFruitCoordinate,
     headCoordinate,
@@ -67,7 +68,7 @@ export default class GameController {
       arr.push([]);
     }
 
-    arr.forEach((a) => {
+    arr.forEach((a: string[]) => {
       for (let i = 0; i < this.fieldWidth; i += 1) {
         a.push('_');
       }
@@ -81,7 +82,7 @@ export default class GameController {
     });
 
     for (let i = 0; i < arr.length; i += 1) {
-      const str = arr[i].reduce((s, v) => s + v);
+      const str = arr[i].reduce((s: any, v: any) => s + v);
       console.log(str);
     }
   }
@@ -95,7 +96,7 @@ export default class GameController {
     }, 1000 / tickrate);
   }
 
-  private collision = (snakeHead) => {
+  private collision = (snakeHead: Point) => {
     if (
       snakeHead.x < 0
       || snakeHead.y < 0
@@ -105,7 +106,7 @@ export default class GameController {
     return false;
   }
 
-  private checkFruit = (snakeHead) => {
+  private checkFruit = (snakeHead: Point) => {
     if (snakeHead.x === this.fruit.x && snakeHead.y === this.fruit.y) {
       this.generateFruit();
     }
@@ -117,7 +118,7 @@ export default class GameController {
     // update players
     this.players.forEach((player) => player.update(this.deltaTime));
 
-    this.drawToTerminal();
+    // this.drawToTerminal();
 
     // check new position
     this.players.forEach((player) => {
@@ -130,4 +131,11 @@ export default class GameController {
 }
 
 const gc = new GameController();
-// [][][X][X][F][]
+
+// [_][_][_][_][_][_][_]
+// [_][_][_][_][_][_][_]
+// [_][_][_][_][_][_][_]
+// [_][_][_][_][_][_][_]
+// [_][_][_][_][_][_][_]
+// [_][_][_][_][_][_][_]
+// [_][_][_][_][_][_][_]
