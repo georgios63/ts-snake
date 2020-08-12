@@ -5,7 +5,6 @@
   - Field - 5x5
   - Update Loop
   - Players
-    |- Player1
-      |- Snake
-    |- Player2
-      |- Snake
+    |- Player(1) - Class
+      - Snake
+        |- Snake - Class
