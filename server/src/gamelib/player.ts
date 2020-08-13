@@ -8,12 +8,14 @@ interface PlayerArgs {
 }
 
 export default class Player {
+  public isAlive : boolean;
+
   private _snake: Array<Point>;
   private direction: { x: number, y: number };
   private baseSpeed: number;
   private speedMultiplier: number;
   private timeExpired: number;
-  private getFruitCoordinate: Function;
+  private getFruitCoordinate: () => Point;
 
   constructor(options: PlayerArgs) {
     const {
@@ -27,16 +29,10 @@ export default class Player {
     this.getFruitCoordinate = getFruitCoordinate;
     this.speedMultiplier = 1;
     this.timeExpired = 0;
+    this.isAlive = true;
+
     this._snake = this.createSnake(headCoordinate, tailCoordinate);
     this.direction = this.setInitialDirection(headCoordinate, tailCoordinate);
-  }
-
-  public update = (deltaTime: number) => {
-    this.timeExpired += deltaTime;
-    if (this.timeExpired >= this.baseSpeed) {
-      this.timeExpired = 0;
-      this.move();
-    }
   }
 
   public get snake() {
@@ -47,21 +43,47 @@ export default class Player {
     };
   }
 
+  public update = (deltaTime: number) => {
+    this.timeExpired += deltaTime;
+
+    if (this.timeExpired >= this.baseSpeed) {
+      this.timeExpired = 0;
+      this.move();
+    }
+  }
+
+  public onCollision = () => {
+    this.isAlive = false;
+  }
+
+  public setDirection = (direction: { x: number, y: number }) => {
+    const point = new Point(
+      this.snake.head.x + direction.x,
+      this.snake.head.y + direction.y,
+    );
+    if (point.x === this._snake[1].x && point.y === this._snake[1].y) {
+      return;
+    }
+    this.direction = direction;
+  }
+
   private setInitialDirection = (headCoordinate: Point, tailCoordinate: Point) => {
     const propKey = headCoordinate.x === tailCoordinate.x ? 'y' : 'x';
     const direction = headCoordinate[propKey] < tailCoordinate[propKey] ? -1 : 1;
+
     return propKey === 'x'
       ? { x: direction, y: 0 }
       : { x: 0, y: direction };
   }
 
   private createSnake = (headCoordinate: Point, tailCoordinate: Point) => {
-    // TODO: add logic to create varying length snakes!
     const snake: Array<Point> = [headCoordinate, tailCoordinate];
     return snake;
   }
 
   private move = () => {
+    if (!this.isAlive) return;
+
     const fruitCoordinate = this.getFruitCoordinate();
     const point = new Point(
       this.snake.head.x + this.direction.x,

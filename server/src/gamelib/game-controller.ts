@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-expressions */
 import Point from './point';
 import Player from './player';
 import events from './event-emitter';
@@ -11,10 +12,12 @@ export default class GameController {
   private players: Array<Player>;
   private deltaTime: number;
   private lastTick: number;
+  private isRunning: boolean;
 
   constructor() {
-    this.fieldWidth = 20;
-    this.fieldHeight = 10;
+    this.fieldWidth = 15;
+    this.fieldHeight = 15;
+    this.isRunning = true;
     this.lastTick = Date.now();
     this.init();
   }
@@ -26,7 +29,7 @@ export default class GameController {
   }
 
   private createPlayer = (headCoordinate: Point, tailCoordinate: Point) => new Player({
-    baseSpeed: 500,
+    baseSpeed: 150,
     getFruitCoordinate: this.getFruitCoordinate,
     headCoordinate,
     tailCoordinate,
@@ -37,11 +40,8 @@ export default class GameController {
       new Point(3, 1),
       new Point(2, 1),
     );
-    const p2 = this.createPlayer(
-      new Point(3, this.fieldWidth - 1),
-      new Point(2, this.fieldHeight - 2),
-    );
-    this.players = [p1, p2];
+
+    this.players = [p1];
   }
 
   private generateFruit = () => {
@@ -61,32 +61,6 @@ export default class GameController {
     });
   }
 
-  private drawToTerminal = () => {
-    console.clear();
-    const arr: any = [];
-    for (let i = 0; i < this.fieldHeight; i += 1) {
-      arr.push([]);
-    }
-
-    arr.forEach((a: string[]) => {
-      for (let i = 0; i < this.fieldWidth; i += 1) {
-        a.push('_');
-      }
-    });
-
-    arr[this.fruit.y][this.fruit.x] = 'F';
-    this.players.forEach((player) => {
-      player.snake.body.forEach((bodyPart) => {
-        arr[bodyPart.y][bodyPart.x] = 'X';
-      });
-    });
-
-    for (let i = 0; i < arr.length; i += 1) {
-      const str = arr[i].reduce((s: any, v: any) => s + v);
-      console.log(str);
-    }
-  }
-
   private tick = () => {
     this.deltaTime = Date.now() - this.lastTick;
     this.lastTick = Date.now();
@@ -96,7 +70,30 @@ export default class GameController {
     }, 1000 / tickrate);
   }
 
-  private collision = (snakeHead: Point) => {
+  private hasCollided = (snakeHead: Point) => {
+    const boundaryCollision = this.checkBoundaryCollision(snakeHead);
+    const playerCollision = this.checkPlayerCollision(snakeHead);
+    if (boundaryCollision || playerCollision) {
+      return true;
+    }
+    return false;
+  }
+
+  private checkPlayerCollision = (snakeHead: Point) => {
+    let collided = false;
+
+    this.players.forEach((player) => {
+      player.snake.body.forEach((bodyPart) => {
+        if (bodyPart.x === snakeHead.x && bodyPart.y === snakeHead.y) {
+          collided = !collided && snakeHead !== bodyPart;
+        }
+      });
+    });
+
+    return collided;
+  }
+
+  private checkBoundaryCollision = (snakeHead: Point) => {
     if (
       snakeHead.x < 0
       || snakeHead.y < 0
@@ -115,27 +112,63 @@ export default class GameController {
   private getFruitCoordinate = () => this.fruit;
 
   private update() {
-    // update players
+    if (!this.isRunning) return;
     this.players.forEach((player) => player.update(this.deltaTime));
 
-    // this.drawToTerminal();
-
-    // check new position
     this.players.forEach((player) => {
-      this.collision(player.snake.head);
+      if (!player.isAlive) return;
+
+      const collided = this.hasCollided(player.snake.head);
+      if (collided) {
+        player.onCollision();
+        return;
+      }
       this.checkFruit(player.snake.head);
+      // ! REMOVE LATER
+      this.drawToTerminal();
     });
 
     // after everything has been processed, send game data to player clients
+  }
+
+  private drawToTerminal = () => {
+    console.clear();
+    const arr: any = [];
+    for (let i = 0; i < this.fieldHeight; i += 1) {
+      arr.push([]);
+    }
+
+    arr.forEach((a: Array<string>) => {
+      for (let i = 0; i < this.fieldWidth; i += 1) {
+        a.push('_');
+      }
+    });
+
+    arr[this.fruit.y][this.fruit.x] = 'F';
+    this.players.forEach((player) => {
+      player.snake.body.forEach((bodyPart) => {
+        arr[bodyPart.y][bodyPart.x] = 'X';
+      });
+    });
+
+    for (let i = 0; i < arr.length; i += 1) {
+      const str = arr[i].reduce((s: any, v: any) => s + v);
+      console.log(str);
+    }
   }
 }
 
 const gc = new GameController();
 
-// [_][_][_][_][_][_][_]
-// [_][_][_][_][_][_][_]
-// [_][_][_][_][_][_][_]
-// [_][_][_][_][_][_][_]
-// [_][_][_][_][_][_][_]
-// [_][_][_][_][_][_][_]
-// [_][_][_][_][_][_][_]
+// [_][_][_][B][B][_][_]
+// [_][_][_][B][B][H][_]
+// [_][_][_][B][O][_][_]
+// [_][_][_][B][B][_][_]
+// [_][_][_][_][B][_][_]
+// [_][_][F][_][B][_][_]
+// [_][_][_][_][B][_][_]
+
+// [H][T][T][7]
+// [1][2][3][4]
+// [2][F][H][T]
+// [_][10][11][12]
