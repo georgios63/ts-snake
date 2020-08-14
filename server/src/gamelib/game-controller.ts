@@ -13,13 +13,19 @@ export default class GameController {
   private deltaTime: number;
   private lastTick: number;
   private isRunning: boolean;
+  private io: any;
 
-  constructor() {
-    this.fieldWidth = 15;
-    this.fieldHeight = 15;
+  constructor(io: any) {
+    this.fieldWidth = 20;
+    this.fieldHeight = 20;
     this.isRunning = true;
     this.lastTick = Date.now();
+    this.io = io;
     this.init();
+  }
+
+  public updatePlayerDirection(direction: { x: number, y: number }) {
+    this.players[0].setDirection(direction);
   }
 
   private init = () => {
@@ -29,7 +35,7 @@ export default class GameController {
   }
 
   private createPlayer = (headCoordinate: Point, tailCoordinate: Point) => new Player({
-    baseSpeed: 150,
+    baseSpeed: 100,
     getFruitCoordinate: this.getFruitCoordinate,
     headCoordinate,
     tailCoordinate,
@@ -129,6 +135,7 @@ export default class GameController {
     });
 
     // after everything has been processed, send game data to player clients
+    this.io.emit('game-update', this.players[0].snake.body);
   }
 
   private drawToTerminal = () => {
@@ -157,8 +164,6 @@ export default class GameController {
     }
   }
 }
-
-const gc = new GameController();
 
 // [_][_][_][B][B][_][_]
 // [_][_][_][B][B][H][_]

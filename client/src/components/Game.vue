@@ -5,11 +5,15 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator';
+import { Component, Vue } from 'vue-property-decorator';
 import io from 'socket.io-client';
 import { mapState } from 'vuex';
+import userInput, { CustomKeyEvent } from '../util/input-handler';
 
-const socket = io('http://localhost:3000', { autoConnect: false });
+const socket = io('http://localhost:3000', {
+  autoConnect: false,
+  reconnectionDelay: 250,
+});
 
 @Component({
   computed: { ...mapState(['token']) },
@@ -17,12 +21,42 @@ const socket = io('http://localhost:3000', { autoConnect: false });
 export default class Game extends Vue {
   private token!: string;
 
-  created() {
+  private makeSocketConnection() {
     socket.io.opts.query = { token: this.token };
     socket.connect();
     socket.on('connect', () => {
       console.log('Connected to server...');
     });
+  }
+
+  private onUserInput(e: CustomKeyEvent) {
+    if (e.type === 'keydown') {
+      let direction = { x: 0, y: 0 };
+
+      if (e.keyName === 'K_ARROWUP') {
+        direction = { x: 0, y: -1 };
+      }
+      if (e.keyName === 'K_ARROWLEFT') {
+        direction = { x: -1, y: 0 };
+      }
+      if (e.keyName === 'K_ARROWRIGHT') {
+        direction = { x: 1, y: 0 };
+      }
+      if (e.keyName === 'K_ARROWDOWN') {
+        direction = { x: 0, y: 1 };
+      }
+      this.sendDirection(direction);
+    }
+  }
+
+  private sendDirection(direction: { x: number; y: number }) {
+    socket.emit('action', direction);
+    console.log('sent:', direction);
+  }
+
+  created() {
+    this.makeSocketConnection();
+    userInput.add(this.onUserInput);
   }
 }
 </script>
