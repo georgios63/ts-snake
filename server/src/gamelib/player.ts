@@ -15,6 +15,7 @@ export default class Player {
   private baseSpeed: number;
   private speedMultiplier: number;
   private timeExpired: number;
+  private eatenFruits: number;
   private getFruitCoordinate: () => Point;
 
   constructor(options: PlayerArgs) {
@@ -27,8 +28,9 @@ export default class Player {
 
     this.baseSpeed = baseSpeed;
     this.getFruitCoordinate = getFruitCoordinate;
-    this.speedMultiplier = 1;
+    this.speedMultiplier = 5;
     this.timeExpired = 0;
+    this.eatenFruits = 0;
     this.isAlive = true;
 
     this._snake = this.createSnake(headCoordinate, tailCoordinate);
@@ -46,7 +48,7 @@ export default class Player {
   public update = (deltaTime: number) => {
     this.timeExpired += deltaTime;
 
-    if (this.timeExpired >= this.baseSpeed) {
+    if (this.timeExpired >= this.baseSpeed - (this.speedMultiplier * this.eatenFruits)) {
       this.timeExpired = 0;
       this.move();
     }
@@ -98,6 +100,7 @@ export default class Player {
       && fruitCoordinate.y === this.snake.head.y
     ) {
       this._snake.push(tail);
+      this.eatenFruits += 1;
     }
   }
 }

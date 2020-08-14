@@ -13,19 +13,25 @@ export default class GameController {
   private deltaTime: number;
   private lastTick: number;
   private isRunning: boolean;
+  private started: boolean;
   private io: any;
 
   constructor(io: any) {
-    this.fieldWidth = 20;
-    this.fieldHeight = 20;
+    this.fieldWidth = 15;
+    this.fieldHeight = 15;
     this.isRunning = true;
     this.lastTick = Date.now();
     this.io = io;
+    this.started = false;
     this.init();
   }
 
   public updatePlayerDirection(direction: { x: number, y: number }) {
     this.players[0].setDirection(direction);
+  }
+
+  public start = () => {
+    this.started = true;
   }
 
   private init = () => {
@@ -35,7 +41,7 @@ export default class GameController {
   }
 
   private createPlayer = (headCoordinate: Point, tailCoordinate: Point) => new Player({
-    baseSpeed: 100,
+    baseSpeed: 150,
     getFruitCoordinate: this.getFruitCoordinate,
     headCoordinate,
     tailCoordinate,
@@ -119,20 +125,23 @@ export default class GameController {
 
   private update() {
     if (!this.isRunning) return;
-    this.players.forEach((player) => player.update(this.deltaTime));
+    if (this.started) {
+      this.players.forEach((player) => player.update(this.deltaTime));
 
-    this.players.forEach((player) => {
-      if (!player.isAlive) return;
+      this.players.forEach((player) => {
+        if (!player.isAlive) return;
 
-      const collided = this.hasCollided(player.snake.head);
-      if (collided) {
-        player.onCollision();
-        return;
-      }
-      this.checkFruit(player.snake.head);
-      // ! REMOVE LATER
-      this.drawToTerminal();
-    });
+        const collided = this.hasCollided(player.snake.head);
+        if (collided) {
+          player.onCollision();
+          return;
+        }
+        this.checkFruit(player.snake.head);
+      });
+    }
+
+    // ! REMOVE LATER
+    this.drawToTerminal();
 
     // after everything has been processed, send game data to player clients
     this.io.emit('game-update', this.players[0].snake.body);
@@ -147,14 +156,14 @@ export default class GameController {
 
     arr.forEach((a: Array<string>) => {
       for (let i = 0; i < this.fieldWidth; i += 1) {
-        a.push('_');
+        a.push(' . ');
       }
     });
 
-    arr[this.fruit.y][this.fruit.x] = 'F';
+    arr[this.fruit.y][this.fruit.x] = ' F ';
     this.players.forEach((player) => {
       player.snake.body.forEach((bodyPart) => {
-        arr[bodyPart.y][bodyPart.x] = 'X';
+        arr[bodyPart.y][bodyPart.x] = ' X ';
       });
     });
 

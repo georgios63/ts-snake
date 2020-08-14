@@ -30,7 +30,7 @@ export default class Game extends Vue {
   }
 
   private onUserInput(e: CustomKeyEvent) {
-    if (e.type === 'keydown') {
+    if (e.type === 'keydown' && e.keyName !== 'K_ENTER') {
       let direction = { x: 0, y: 0 };
 
       if (e.keyName === 'K_ARROWUP') {
@@ -46,6 +46,8 @@ export default class Game extends Vue {
         direction = { x: 0, y: 1 };
       }
       this.sendDirection(direction);
+    } else if (e.keyName === 'K_ENTER') {
+      socket.emit('start', 'go!');
     }
   }
 
