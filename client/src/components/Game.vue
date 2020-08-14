@@ -1,39 +1,32 @@
 <template>
-  <div class="hello"><h1>Game component rendered.</h1></div>
+  <div>
+
+  </div>
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+import { Component, Prop, Vue } from 'vue-property-decorator';
 import io from 'socket.io-client';
-import store from '../store';
+import { mapState } from 'vuex';
 
-const socket = io('http://localhost:3000', {
-  autoConnect: false,
-  query: {
-    // eslint-disable-next-line dot-notation
-    token: store.state['token'],
-  },
-});
+const socket = io('http://localhost:3000', { autoConnect: false });
 
-console.log(store.state);
-
-export default Vue.extend({
-  name: 'Game',
-  props: {
-    msg: String,
-  },
+@Component({
+  computed: { ...mapState(['token']) },
+})
+export default class Game extends Vue {
+  private token!: string;
 
   created() {
+    socket.io.opts.query = { token: this.token };
     socket.connect();
     socket.on('connect', () => {
-      console.log(socket);
-      socket.emit('custom-message', 'Hello George!');
+      console.log('Connected to server...');
     });
-    socket.on('message-response', (message: string) => {
-      console.log('Server sent me:', message);
-    });
-  },
-});
+  }
+}
 </script>
 
-<style scoped lang="scss"></style>
+<!-- Add "scoped" attribute to limit CSS to this component only -->
+<style scoped lang="scss">
+</style>

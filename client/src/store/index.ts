@@ -13,7 +13,7 @@ export default new Vuex.Store({
     token: '',
   },
   mutations: {
-    setToken(state, token: string) {
+    setToken: (state, token) => {
       state.token = token;
     },
   },

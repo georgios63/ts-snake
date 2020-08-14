@@ -5,25 +5,27 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+import { Component, Vue } from 'vue-property-decorator';
+import { mapState, mapMutations, Mutation } from 'vuex';
 import { v4 as uuid } from 'uuid';
-import { mapState, mapMutations } from 'vuex';
 
-export default Vue.extend({
+@Component({
   computed: {
     ...mapState(['token']),
   },
   methods: {
     ...mapMutations(['setToken']),
   },
+})
+export default class App extends Vue {
+  private token!: string;
+  private setToken!: (token: string) => void;
+
   created() {
-    console.log('token:', this.token);
-    if (!this.token) {
-      this.setToken(uuid());
-    }
-    console.log('token:', this.token);
-  },
-});
+    if (!this.token) this.setToken(uuid());
+    console.log(this.token);
+  }
+}
 </script>
 
 <style lang="scss">
