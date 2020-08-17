@@ -63,9 +63,12 @@ export default class Player {
       this.snake.head.x + direction.x,
       this.snake.head.y + direction.y,
     );
-    if (point.x === this._snake[1].x && point.y === this._snake[1].y) {
-      return;
-    }
+
+    if (
+      (direction.x === 0 && direction.y === 0)
+      || (point.x === this._snake[1].x && point.y === this._snake[1].y)
+    ) return;
+
     this.direction = direction;
   }
 
@@ -93,14 +96,14 @@ export default class Player {
     );
 
     this._snake.unshift(point);
-    const tail = this._snake.pop()!;
 
     if (
       fruitCoordinate.x === this.snake.head.x
       && fruitCoordinate.y === this.snake.head.y
     ) {
-      this._snake.push(tail);
       this.eatenFruits += 1;
+    } else {
+      this._snake.pop();
     }
   }
 }
