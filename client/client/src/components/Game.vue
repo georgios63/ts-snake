@@ -1,6 +1,6 @@
 <template>
   <div>
-    <canvas style="background-color: black"></canvas>
+
   </div>
 </template>
 
@@ -20,17 +20,12 @@ const socket = io('http://localhost:3000', {
 })
 export default class Game extends Vue {
   private token!: string;
-  private ctx!: CanvasRenderingContext2D;
-  private data: Array<{ x: number; y: number; width: number; height: number }> = [];
 
   private makeSocketConnection() {
     socket.io.opts.query = { token: this.token };
     socket.connect();
     socket.on('connect', () => {
       console.log('Connected to server...');
-      socket.on('update', (data) => {
-        this.data = data;
-      });
     });
   }
 
@@ -59,30 +54,6 @@ export default class Game extends Vue {
   private sendDirection(direction: { x: number; y: number }) {
     socket.emit('action', direction);
     console.log('sent:', direction);
-  }
-
-  private draw() {
-    requestAnimationFrame(() => {
-      this.ctx.fillStyle = 'white';
-      this.ctx.clearRect(0, 0, 1024, 768);
-      this.data.forEach((rect) => {
-        this.ctx.fillRect(rect.x, rect.y, rect.width, rect.height);
-        console.log(`x: ${rect.x}, y: ${rect.y}, width: ${rect.width}, height: ${rect.height}`);
-      });
-      this.draw();
-    });
-  }
-
-  private initializeCanvas() {
-    const canvas = document.querySelector('canvas') as HTMLCanvasElement;
-    this.ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
-    this.ctx.canvas.width = 1024;
-    this.ctx.canvas.height = 768;
-    this.draw();
-  }
-
-  mounted() {
-    this.initializeCanvas();
   }
 
   created() {
