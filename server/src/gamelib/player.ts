@@ -2,23 +2,31 @@
 import { Rect2D } from './util';
 import BaseComponent from './base-component';
 
+interface Direction {
+  x: number,
+  y: number,
+}
+
+interface SnakePart {
+  rect: Rect2D,
+  direction: Direction,
+}
+
 export default class Player extends BaseComponent {
   public name = 'Player';
+  public id: string;
 
-  private _snake: Array<Rect2D>;
-  private direction: { x: number, y: number };
-  private prevDirection: { x: number; y: number };
+  private parts: Array<SnakePart>;
   private callback: Function;
-  private inputQueue: Array<any> = [];
-  // temp
-  private speed = 15;
+  private inputQueue: Array<Direction> = [];
+  private baseSpeed = 5;
 
-  constructor(headPosition: Rect2D, callback: Function) {
+  constructor(headPosition: Rect2D, id: string, callback: Function) {
     super();
-    this._snake = [headPosition];
+    const direction = { x: 1, y: 0 };
+    this.parts = [{ direction, rect: headPosition }];
+    this.id = id;
     this.callback = callback;
-    this.setInitialDirection(headPosition);
-    this.prevDirection = { ...this.direction };
   }
 
   public update = (deltaTime: number) => {
@@ -28,104 +36,124 @@ export default class Player extends BaseComponent {
 
   public get snake() {
     return {
-      head: this._snake[0],
-      tail: this._snake[this._snake.length - 1],
+      head: this.parts[0],
+      tail: this.parts[this.parts.length - 1],
     };
   }
 
-  // ! REMOVE LATER
-  public toJSON = () => this._snake
+  public addDirectionInput = (dir: Direction) => {
+    if (dir.x === 0 && dir.y === 0) return;
 
-  private setInitialDirection = (headPosition: Rect2D) => {
-    this.direction = { x: 1, y: 0 };
-  }
-
-  public setDirection = ({ x, y }: { x: number, y: number }) => {
     const { head } = this.snake;
-    if (x === 0 && y === 0) return;
-    if (x + this.direction.x === 0 && y + this.direction.y === 0) return;
-    if (head.height < 30 && head.width < 30) {
-      this.inputQueue.push({ x, y });
+    if (this.inputQueue.length < 1) {
+      if (head.direction.x + dir.x !== 0 || head.direction.y + dir.y !== 0) {
+        this.inputQueue.push(dir);
+      }
       return;
     }
 
-    this.prevDirection = { ...this.direction };
-    this.direction = { x, y };
+    const prevInput = this.inputQueue[this.inputQueue.length - 1];
+    if (prevInput.x + dir.x !== 0 || prevInput.y !== dir.y) {
+      this.inputQueue.push(dir);
+    }
+  }
+
+  // ! REMOVE LATER
+  public toJSON = () => this.parts.map((part) => part.rect)
+
+  private getNewPoint = () => {
+    const { direction, rect } = this.snake.head;
+    return {
+      x: direction.x < 0 ? rect.x : rect.x + rect.width - 15,
+      y: direction.y < 0 ? rect.y : rect.y + rect.height - 15,
+    };
   }
 
   private moveLeft = (distance: number) => {
     const { head } = this.snake;
-    head.x -= distance;
-    head.width += distance;
+    head.rect.x -= distance;
+    if (this.parts.length > 1) {
+      head.rect.width += distance;
+    }
   }
 
   private moveRight = (distance: number) => {
     const { head } = this.snake;
-    head.width += distance;
+    if (this.parts.length > 1) {
+      head.rect.width += distance;
+    } else {
+      head.rect.x += distance;
+    }
   }
 
   private moveUp = (distance: number) => {
     const { head } = this.snake;
-    head.y -= distance;
-    head.height += distance;
+    head.rect.y -= distance;
+    if (this.parts.length > 1) {
+      head.rect.height += distance;
+    }
   }
 
   private moveDown = (distance: number) => {
     const { head } = this.snake;
-    head.height += distance;
-  }
-
-  private shrink = (distance: number) => {
-    const { tail } = this.snake;
-    if (tail.height > tail.width) {
-      tail.height -= distance;
+    if (this.parts.length > 1) {
+      head.rect.height += distance;
     } else {
-      tail.width -= distance;
-    }
-    if (tail.width < 0 || tail.height < 0) {
-      this._snake.pop();
+      head.rect.y += distance;
     }
   }
 
-  private getNextPoint = () => {
-    const { head } = this.snake;
-    if (this.direction.x !== 0) {
-      // moving left or right
-      return {
-        x: head.x,
-        y: this.prevDirection.y < 0 ? head.y : head.y + head.height - 15,
-      };
+  private moveTail = (distance: number) => {
+    if (!(this.parts.length > 1)) return;
+    const { direction, rect } = this.snake.tail;
+    // shrink part
+    if (direction.x < 0) {
+      rect.width -= distance;
     }
-    return {
-      x: this.prevDirection.x < 0 ? head.x : head.x + head.width - 15,
-      y: head.y,
-    };
+    if (direction.x > 0) {
+      rect.x += distance;
+      rect.width -= distance;
+    }
+    if (direction.y < 0) {
+      rect.height -= distance;
+    }
+    if (direction.y > 0) {
+      rect.y += distance;
+      rect.height -= distance;
+    }
+    // remove part
+    if (rect.height < 15 || rect.width < 15) {
+      console.clear();
+      // console.log(this.parts);
+      // console.log(rect);
+      this.parts.pop();
+    }
   }
 
   private move = (deltaTime: number) => {
+    const { width, height } = this.snake.head.rect;
+    // create new part with new direction
+    if (this.inputQueue.length && (width >= 30 || height >= 30)) {
+      const { x, y } = this.getNewPoint();
+      const direction = this.inputQueue.shift()!;
+      this.parts.unshift({
+        direction,
+        rect: new Rect2D(x, y, 15, 15),
+      });
+    }
+
     const { head } = this.snake;
+    const distance = {
+      x: (deltaTime / this.baseSpeed) * head.direction.x,
+      y: (deltaTime / this.baseSpeed) * head.direction.y,
+    };
 
-    if (this.inputQueue.length > 0 && head.width >= 30 && head.height >= 30) {
-      this.direction = this.inputQueue.shift();
-    }
+    if (distance.x < 0) this.moveLeft(Math.abs(distance.x));
+    if (distance.x > 0) this.moveRight(Math.abs(distance.x));
+    if (distance.y < 0) this.moveUp(Math.abs(distance.y));
+    if (distance.y > 0) this.moveDown(Math.abs(distance.y));
 
-    const xDistance = (deltaTime / this.speed) * this.direction.x;
-    const yDistance = (deltaTime / this.speed) * this.direction.y;
-
-    if (
-      (head.height === 15 && yDistance !== 0)
-      || (head.width === 15 && xDistance !== 0)
-    ) {
-      const point = this.getNextPoint();
-      this._snake.unshift(new Rect2D(point.x, point.y, 15, 15));
-    }
-
-    this.shrink(Math.abs(xDistance + yDistance));
-
-    if (xDistance < 0) this.moveLeft(Math.abs(xDistance));
-    if (xDistance > 0) this.moveRight(Math.abs(xDistance));
-    if (yDistance < 0) this.moveUp(Math.abs(yDistance));
-    if (yDistance > 0) this.moveDown(Math.abs(yDistance));
+    this.moveTail(Math.abs(distance.x + distance.y));
   }
 }
 

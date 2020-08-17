@@ -8,13 +8,19 @@ const app = express();
 const server = http.createServer(app);
 const io = socketio(server);
 
+let player;
+
 io.on('connection', (socket) => {
   const { token } = socket.handshake.query;
-  const player = new Player(new Rect2D(50, 50, 15, 15), () => {
-    socket.emit('update', player.toJSON());
-  });
   socket.on('action', (direction: { x: number; y: number }) => {
-    player.setDirection(direction);
+    if (player) {
+      player.addDirectionInput(direction);
+    }
+  });
+  socket.on('start', () => {
+    player = new Player(new Rect2D(50, 50, 75, 15), token, () => {
+      socket.emit('update', player.toJSON());
+    });
   });
 });
 
