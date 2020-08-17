@@ -1,6 +1,6 @@
 <template>
   <div>
-
+    <canvas style="width: 1024px; height: 764px; background-color: black"></canvas>
   </div>
 </template>
 
@@ -20,10 +20,11 @@ const socket = io('http://localhost:3000', {
 })
 export default class Game extends Vue {
   private token!: string;
+  private ctx: CanvasRenderingContext2D | null;
 
   private makeSocketConnection() {
     socket.io.opts.query = { token: this.token };
-    socket.connect();
+    // socket.connect();
     socket.on('connect', () => {
       console.log('Connected to server...');
     });
@@ -54,6 +55,19 @@ export default class Game extends Vue {
   private sendDirection(direction: { x: number; y: number }) {
     socket.emit('action', direction);
     console.log('sent:', direction);
+  }
+
+  private draw() {
+    this.ctx.fillStyle = 'white';
+    this.ctx.fillRect(10, 10, 1, 1);
+  }
+
+  mounted() {
+    const canvas = document.querySelector('canvas');
+    this.ctx = canvas.getContext('2d');
+    this.ctx.imageSmoothingEnabled = false;
+    console.log(this.ctx);
+    this.draw();
   }
 
   created() {

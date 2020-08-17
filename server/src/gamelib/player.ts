@@ -1,109 +1,26 @@
-import Point from './point';
+import { Rect2D } from './util';
+import BaseComponent from './base-component';
 
-interface PlayerArgs {
-  baseSpeed: number,
-  headCoordinate: Point,
-  tailCoordinate: Point,
-  getFruitCoordinate(): Point,
-}
+export default class Player extends BaseComponent {
+  public name = 'Player';
 
-export default class Player {
-  public isAlive : boolean;
+  private _snake: Array<Rect2D>;
 
-  private _snake: Array<Point>;
-  private direction: { x: number, y: number };
-  private baseSpeed: number;
-  private speedMultiplier: number;
-  private timeExpired: number;
-  private eatenFruits: number;
-  private getFruitCoordinate: () => Point;
-
-  constructor(options: PlayerArgs) {
-    const {
-      headCoordinate,
-      tailCoordinate,
-      baseSpeed,
-      getFruitCoordinate,
-    } = options;
-
-    this.baseSpeed = baseSpeed;
-    this.getFruitCoordinate = getFruitCoordinate;
-    this.speedMultiplier = 5;
-    this.timeExpired = 0;
-    this.eatenFruits = 0;
-    this.isAlive = true;
-
-    this._snake = this.createSnake(headCoordinate, tailCoordinate);
-    this.direction = this.setInitialDirection(headCoordinate, tailCoordinate);
-  }
-
-  public get snake() {
-    return {
-      body: this._snake,
-      head: this._snake[0],
-      length: this._snake.length,
-    };
+  constructor(headPosition: Rect2D, tailPosition: Rect2D) {
+    super();
+    this._snake = [headPosition, tailPosition];
   }
 
   public update = (deltaTime: number) => {
-    this.timeExpired += deltaTime;
-
-    if (this.timeExpired >= this.baseSpeed - (this.speedMultiplier * this.eatenFruits)) {
-      this.timeExpired = 0;
-      this.move();
-    }
+    this.move(deltaTime);
   }
 
-  public onCollision = () => {
-    this.isAlive = false;
-  }
-
-  public setDirection = (direction: { x: number, y: number }) => {
-    const point = new Point(
-      this.snake.head.x + direction.x,
-      this.snake.head.y + direction.y,
-    );
-
-    if (
-      (direction.x === 0 && direction.y === 0)
-      || (point.x === this._snake[1].x && point.y === this._snake[1].y)
-    ) return;
-
-    this.direction = direction;
-  }
-
-  private setInitialDirection = (headCoordinate: Point, tailCoordinate: Point) => {
-    const propKey = headCoordinate.x === tailCoordinate.x ? 'y' : 'x';
-    const direction = headCoordinate[propKey] < tailCoordinate[propKey] ? -1 : 1;
-
-    return propKey === 'x'
-      ? { x: direction, y: 0 }
-      : { x: 0, y: direction };
-  }
-
-  private createSnake = (headCoordinate: Point, tailCoordinate: Point) => {
-    const snake: Array<Point> = [headCoordinate, tailCoordinate];
-    return snake;
-  }
-
-  private move = () => {
-    if (!this.isAlive) return;
-
-    const fruitCoordinate = this.getFruitCoordinate();
-    const point = new Point(
-      this.snake.head.x + this.direction.x,
-      this.snake.head.y + this.direction.y,
-    );
-
-    this._snake.unshift(point);
-
-    if (
-      fruitCoordinate.x === this.snake.head.x
-      && fruitCoordinate.y === this.snake.head.y
-    ) {
-      this.eatenFruits += 1;
-    } else {
-      this._snake.pop();
-    }
+  private move = (deltaTime: number) => {
+    const head = this._snake[0];
+    head.x += deltaTime / 10;
+    console.log(head.x);
   }
 }
+
+// eslint-disable-next-line no-new
+new Player(new Rect2D(0, 0, 10, 10), new Rect2D(0, 0, 10, 10));
