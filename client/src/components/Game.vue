@@ -1,6 +1,6 @@
 <template>
   <div>
-    <canvas style="background-color: black"></canvas>
+    <canvas style="background-color: beige"></canvas>
   </div>
 </template>
 
@@ -9,6 +9,18 @@ import { Component, Vue } from 'vue-property-decorator';
 import io from 'socket.io-client';
 import { mapState } from 'vuex';
 import userInput, { CustomKeyEvent } from '../util/input-handler';
+
+interface Rect2D {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+interface GameData {
+  player: Array<Rect2D>;
+  fruit: Rect2D;
+}
 
 const socket = io('http://localhost:3000', {
   autoConnect: false,
@@ -21,7 +33,12 @@ const socket = io('http://localhost:3000', {
 export default class Game extends Vue {
   private token!: string;
   private ctx!: CanvasRenderingContext2D;
-  private data: Array<{ x: number; y: number; width: number; height: number }> = [];
+  private data: GameData = {
+    player: [],
+    fruit: {
+      x: 0, y: 0, width: 0, height: 0,
+    },
+  };
 
   private makeSocketConnection() {
     socket.io.opts.query = { token: this.token };
@@ -62,11 +79,16 @@ export default class Game extends Vue {
 
   private draw() {
     requestAnimationFrame(() => {
-      this.ctx.fillStyle = 'white';
       this.ctx.clearRect(0, 0, 1024, 768);
-      this.data.forEach((rect) => {
+      const { player, fruit } = this.data;
+      this.ctx.fillStyle = 'red';
+      this.ctx.fillRect(fruit.x, fruit.y, fruit.width, fruit.height);
+
+      player.forEach((rect, index) => {
+        this.ctx.fillStyle = 'green';
         this.ctx.fillRect(rect.x, rect.y, rect.width, rect.height);
       });
+
       this.draw();
     });
   }

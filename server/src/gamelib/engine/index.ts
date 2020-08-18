@@ -1,7 +1,9 @@
 const tickrate = 128;
 
 interface RegisteredComponent {
-  update: (deltaTime: number) => void | null;
+  update?: (deltaTime: number) => void;
+  afterUpdate?: () => void;
+  beforeDestroy?: () => void;
   [key: string]: any;
 }
 
@@ -15,6 +17,15 @@ class GameEngine {
 
   public registerComponent = (component: RegisteredComponent) => {
     this.registeredComponents.push(component);
+  }
+
+  public unregisterComponent = (component: RegisteredComponent) => {
+    this.registeredComponents = this.registeredComponents.filter((c) => {
+      if (component.beforeDestroy && c === component) {
+        component.beforeDestroy();
+      }
+      return c !== component;
+    });
   }
 
   private init = () => {
@@ -42,6 +53,12 @@ class GameEngine {
     this.registeredComponents.forEach((component) => {
       if (component.update) {
         component.update(deltaTime);
+      }
+    });
+
+    this.registeredComponents.forEach((component) => {
+      if (component.afterUpdate) {
+        component.afterUpdate();
       }
     });
   }
