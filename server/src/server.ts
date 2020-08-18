@@ -18,6 +18,7 @@ io.on('connection', (socket) => {
     }
   });
   socket.on('start', () => {
+    console.clear();
     player = new Player(new Rect2D(50, 50, 75, 15), token, () => {
       socket.emit('update', player.toJSON());
     });

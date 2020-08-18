@@ -66,7 +66,6 @@ export default class Game extends Vue {
       this.ctx.clearRect(0, 0, 1024, 768);
       this.data.forEach((rect) => {
         this.ctx.fillRect(rect.x, rect.y, rect.width, rect.height);
-        // console.log(`x: ${rect.x}, y: ${rect.y}, width: ${rect.width}, height: ${rect.height}`);
       });
       this.draw();
     });

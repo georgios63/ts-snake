@@ -20,18 +20,16 @@ export default class Player extends BaseComponent {
   private callback: Function;
   private inputQueue: Array<Direction> = [];
   private baseSpeed = 5;
+  private size: number;
 
-  constructor(headPosition: Rect2D, id: string, callback: Function) {
+  constructor(snakePosition: Rect2D, id: string, callback: Function) {
     super();
     const direction = { x: 1, y: 0 };
-    this.parts = [{ direction, rect: headPosition }];
+    const { width, height } = snakePosition;
+    this.parts = [{ direction, rect: snakePosition }];
+    this.size = width > height ? width : height;
     this.id = id;
     this.callback = callback;
-  }
-
-  public update = (deltaTime: number) => {
-    this.move(deltaTime);
-    this.callback();
   }
 
   public get snake() {
@@ -41,20 +39,45 @@ export default class Player extends BaseComponent {
     };
   }
 
+  private get length() {
+    const total = this.parts.reduce((t, part) => {
+      const { width, height } = part.rect;
+      return t + (width > height ? width : height);
+    }, 0);
+    return {
+      normalized: total - ((this.parts.length - 1) * 15),
+      diff: total - ((this.parts.length - 1) * 15) - this.size,
+    };
+  }
+
+  public update = (deltaTime: number) => {
+    this.move(deltaTime);
+    this.callback();
+  }
+
   public addDirectionInput = (dir: Direction) => {
     if (dir.x === 0 && dir.y === 0) return;
 
     const { head } = this.snake;
     if (this.inputQueue.length < 1) {
-      if (head.direction.x + dir.x !== 0 || head.direction.y + dir.y !== 0) {
+      if (
+        Math.abs(head.direction.x + dir.x) === 1
+        || Math.abs(head.direction.y + dir.y) === 1
+      ) {
         this.inputQueue.push(dir);
       }
       return;
     }
 
     const prevInput = this.inputQueue[this.inputQueue.length - 1];
-    if (prevInput.x + dir.x !== 0 || prevInput.y !== dir.y) {
+    if (
+      Math.abs(prevInput.x + dir.x) === 1
+      || Math.abs(prevInput.y + dir.y) === 1
+    ) {
       this.inputQueue.push(dir);
+      if (this.inputQueue.length > 2) {
+        this.inputQueue.shift();
+      }
     }
   }
 
@@ -123,10 +146,8 @@ export default class Player extends BaseComponent {
     }
     // remove part
     if (rect.height < 15 || rect.width < 15) {
-      console.clear();
-      // console.log(this.parts);
-      // console.log(rect);
       this.parts.pop();
+      console.log('length:', this.length);
     }
   }
 
