@@ -2,6 +2,8 @@
 import { Rect2D } from './util';
 import BaseComponent from './base-component';
 
+const SNAKE_WIDTH = 15;
+
 interface Direction {
   x: number,
   y: number,
@@ -14,21 +16,17 @@ interface SnakePart {
 
 export default class Player extends BaseComponent {
   public name = 'Player';
-  public id: string;
 
   private parts: Array<SnakePart>;
   private callback: Function;
   private inputQueue: Array<Direction> = [];
   private baseSpeed = 5;
-  private size: number;
+  private remainder = 0;
 
-  constructor(snakePosition: Rect2D, id: string, callback: Function) {
+  constructor(snakePosition: Rect2D, callback: Function) {
     super();
     const direction = { x: 1, y: 0 };
-    const { width, height } = snakePosition;
     this.parts = [{ direction, rect: snakePosition }];
-    this.size = width > height ? width : height;
-    this.id = id;
     this.callback = callback;
   }
 
@@ -36,17 +34,6 @@ export default class Player extends BaseComponent {
     return {
       head: this.parts[0],
       tail: this.parts[this.parts.length - 1],
-    };
-  }
-
-  private get length() {
-    const total = this.parts.reduce((t, part) => {
-      const { width, height } = part.rect;
-      return t + (width > height ? width : height);
-    }, 0);
-    return {
-      normalized: total - ((this.parts.length - 1) * 15),
-      diff: total - ((this.parts.length - 1) * 15) - this.size,
     };
   }
 
@@ -87,8 +74,8 @@ export default class Player extends BaseComponent {
   private getNewPoint = () => {
     const { direction, rect } = this.snake.head;
     return {
-      x: direction.x < 0 ? rect.x : rect.x + rect.width - 15,
-      y: direction.y < 0 ? rect.y : rect.y + rect.height - 15,
+      x: direction.x < 0 ? rect.x : rect.x + rect.width - SNAKE_WIDTH,
+      y: direction.y < 0 ? rect.y : rect.y + rect.height - SNAKE_WIDTH,
     };
   }
 
@@ -131,35 +118,40 @@ export default class Player extends BaseComponent {
     const { direction, rect } = this.snake.tail;
     // shrink part
     if (direction.x < 0) {
-      rect.width -= distance;
+      rect.width -= distance + this.remainder;
     }
     if (direction.x > 0) {
       rect.x += distance;
-      rect.width -= distance;
+      rect.width -= distance + this.remainder;
     }
     if (direction.y < 0) {
-      rect.height -= distance;
+      rect.height -= distance + this.remainder;
     }
     if (direction.y > 0) {
       rect.y += distance;
-      rect.height -= distance;
+      rect.height -= distance + this.remainder;
     }
+
+    this.remainder = 0;
     // remove part
-    if (rect.height < 15 || rect.width < 15) {
+    if (rect.height < SNAKE_WIDTH || rect.width < SNAKE_WIDTH) {
       this.parts.pop();
-      console.log('length:', this.length);
+      this.remainder = SNAKE_WIDTH - (direction.x ? rect.width : rect.height);
     }
   }
 
   private move = (deltaTime: number) => {
     const { width, height } = this.snake.head.rect;
     // create new part with new direction
-    if (this.inputQueue.length && (width >= 30 || height >= 30)) {
+    if (
+      this.inputQueue.length
+      && (width >= (SNAKE_WIDTH * 2) || height >= (SNAKE_WIDTH * 2))
+    ) {
       const { x, y } = this.getNewPoint();
       const direction = this.inputQueue.shift()!;
       this.parts.unshift({
         direction,
-        rect: new Rect2D(x, y, 15, 15),
+        rect: new Rect2D(x, y, SNAKE_WIDTH, SNAKE_WIDTH),
       });
     }
 
@@ -177,13 +169,3 @@ export default class Player extends BaseComponent {
     this.moveTail(Math.abs(distance.x + distance.y));
   }
 }
-
-/**   0  1  2  3  4  5  6  7  8
- * 0 [_][_][_][_][_][_][_][_][_]
- * 1 [_][_][_][_][_][_][_][_][_]
- * 2 [_][_][_][P][X][_][_][_][_]
- * 3 [_][_][_][X][X][_][_][_][_]
- * 4 [_][_][_][X][X][_][_][_][_]
- * 5 [_][_][_][_][_][_][_][_][_]
- * 6 [_][_][_][_][_][_][_][_][_]
- */
