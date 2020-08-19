@@ -13,7 +13,6 @@ interface SnakePart {
 }
 
 export default class Snake {
-  public name = 'Snake';
   public parts: Array<SnakePart>;
 
   private inputQueue: Array<Direction> = [];

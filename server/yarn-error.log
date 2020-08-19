@@ -2,7 +2,7 @@ Arguments:
   /usr/bin/node /usr/share/yarn/bin/yarn.js lint
 
 PATH: 
-  /home/mitch/dev/ts-snake/server/node_modules/.bin:/tmp/yarn--1597676520520-0.4922675194593904:/home/mitch/dev/ts-snake/server/node_modules/.bin:/home/mitch/.config/yarn/link/node_modules/.bin:/home/mitch/.yarn/bin:/usr/libexec/lib/node_modules/npm/bin/node-gyp-bin:/usr/lib/node_modules/npm/bin/node-gyp-bin:/usr/bin/node_modules/npm/bin/node-gyp-bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
+  /home/giorgos/ts-snake/server/node_modules/.bin:/tmp/yarn--1597826156421-0.9601874378961732:/home/giorgos/ts-snake/server/node_modules/.bin:/home/giorgos/.config/yarn/link/node_modules/.bin:/home/giorgos/.yarn/bin:/usr/libexec/lib/node_modules/npm/bin/node-gyp-bin:/usr/lib/node_modules/npm/bin/node-gyp-bin:/usr/bin/node_modules/npm/bin/node-gyp-bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/mnt/c/Program Files/WindowsApps/CanonicalGroupLimited.Ubuntu20.04onWindows_2004.2020.812.0_x64__79rhkp1fndgsc:/mnt/c/Program Files (x86)/Razer Chroma SDK/bin:/mnt/c/Program Files/Razer Chroma SDK/bin:/mnt/c/Windows/system32:/mnt/c/Windows:/mnt/c/Windows/System32/Wbem:/mnt/c/Windows/System32/WindowsPowerShell/v1.0/:/mnt/c/Users/Toxic/AppData/Local/Microsoft/WindowsApps:/mnt/c/WINDOWS/system32:/mnt/c/WINDOWS:/mnt/c/WINDOWS/System32/Wbem:/mnt/c/WINDOWS/System32/WindowsPowerShell/v1.0/:/mnt/c/WINDOWS/System32/OpenSSH/:/mnt/c/Program Files/nodejs/:/mnt/c/Program Files/MongoDB/Server/4.2/bin:/mnt/c/Program Files/Git/cmd:/mnt/c/Users/Toxic/AppData/Local/atom/bin:/mnt/c/Users/Toxic/AppData/Local/Programs/Microsoft VS Code/bin:/mnt/c/Users/Toxic/AppData/Roaming/npm:/snap/bin
 
 Yarn version: 
   1.22.4
@@ -14,17 +14,17 @@ Platform:
   linux x64
 
 Trace: 
-  Error: EIO: i/o error, write
-      at writeSync (fs.js:573:3)
-      at SyncWriteStream._write (internal/fs/sync_write_stream.js:22:3)
+  Error: write EIO
+      at afterWriteDispatched (internal/stream_base_commons.js:78:25)
+      at writeGeneric (internal/stream_base_commons.js:73:3)
+      at WriteStream.Socket._writeGeneric (net.js:714:5)
+      at WriteStream.Socket._write (net.js:726:8)
       at doWrite (_stream_writable.js:415:12)
       at writeOrBuffer (_stream_writable.js:399:5)
-      at SyncWriteStream.Writable.write (_stream_writable.js:299:11)
-      at ConsoleReporter._log (/usr/share/yarn/lib/cli.js:96769:17)
-      at ConsoleReporter.log (/usr/share/yarn/lib/cli.js:96757:10)
-      at ConsoleReporter.command (/usr/share/yarn/lib/cli.js:96786:10)
-      at /usr/share/yarn/lib/cli.js:34545:16
-      at Generator.next (<anonymous>)
+      at WriteStream.Writable.write (_stream_writable.js:299:11)
+      at Object.clearLine (readline.js:1176:12)
+      at clearLine (/usr/share/yarn/lib/cli.js:49657:12)
+      at ConsoleReporter._log (/usr/share/yarn/lib/cli.js:96768:43)
 
 npm manifest: 
   {

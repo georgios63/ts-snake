@@ -1,5 +1,8 @@
+import { v4 as uuid } from 'uuid';
+
 /* eslint-disable import/prefer-default-export */
 export class Rect2D {
+  public id = uuid();
   public x: number;
   public y: number;
   public width: number;

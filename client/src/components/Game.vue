@@ -68,7 +68,7 @@ export default class Game extends Vue {
         direction = { x: 0, y: 1 };
       }
       this.sendDirection(direction);
-    } else if (e.keyName === 'K_ENTER') {
+    } else if (e.keyName === 'K_ENTER' && e.type === 'keydown') {
       socket.emit('start', 'go!');
     }
   }
@@ -84,7 +84,7 @@ export default class Game extends Vue {
       this.ctx.fillStyle = 'red';
       this.ctx.fillRect(fruit.x, fruit.y, fruit.width, fruit.height);
 
-      player.forEach((rect, index) => {
+      player.forEach((rect) => {
         this.ctx.fillStyle = 'green';
         this.ctx.fillRect(rect.x, rect.y, rect.width, rect.height);
       });

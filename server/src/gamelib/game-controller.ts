@@ -2,6 +2,9 @@ import { Server } from 'socket.io';
 import GameEngine from './engine';
 import { Rect2D } from './util';
 import Player from './player';
+import Collision from './collision';
+import Collider from './collider';
+import Fruit from './fruit';
 
 interface IPlayer {
   [key: string]: Player;
@@ -10,20 +13,33 @@ interface IPlayer {
 export default class GameController {
   private io: Server;
   private players: IPlayer = {};
-  private fruit: Rect2D;
+  private fruit: Fruit;
+  private boundaries = [
+    new Rect2D(0, 0, 1024, 15), // top boundary
+    new Rect2D(1024 - 15, 0, 15, 768), // right boundary
+    new Rect2D(0, 768 - 15, 768, 15), // bottom boundary
+    new Rect2D(0, 0, 15, 768), // left boundary
+  ]
+  private boundaryCollider: any;
 
   constructor(io: Server) {
     GameEngine.registerComponent(this);
     this.io = io;
+    this.boundaryCollider = new Collider(this.boundaries, this);
   }
 
   public afterUpdate = () => {
+    Collision.evaluateCollision();
+    if (this.fruit != null && this.fruit.isEaten) {
+      this.generateFruit();
+    }
+
     const players = Object.values(this.players);
     if (players.length) {
       const playerPosition = players[0].position;
       this.io.emit('update', {
         player: playerPosition,
-        fruit: this.fruit,
+        fruit: this.fruit.position,
       });
     }
   }
@@ -31,7 +47,7 @@ export default class GameController {
   public createPlayer = (playerId: string) => {
     Object.values(this.players).forEach((player) => player.destroy());
     this.players = {};
-    this.players[playerId] = new Player(50, 50, 75, 15);
+    this.players[playerId] = new Player(50, 50, 120, 15);
     this.generateFruit();
   }
 
@@ -85,7 +101,10 @@ export default class GameController {
         );
       } while (this.hasInvalidFruitPosition(fruit));
 
-      this.fruit = fruit;
+      if (this.fruit != null) {
+        this.fruit.destroy();
+      }
+      this.fruit = new Fruit(fruit);
     }
   }
 }
