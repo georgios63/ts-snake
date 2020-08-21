@@ -6,7 +6,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import { mapState, mapMutations, Mutation } from 'vuex';
+import { mapState, mapMutations } from 'vuex';
 import { v4 as uuid } from 'uuid';
 
 @Component({

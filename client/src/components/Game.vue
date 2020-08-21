@@ -25,6 +25,7 @@ interface GameData {
 const socket = io('http://localhost:3000', {
   autoConnect: false,
   reconnectionDelay: 250,
+  transports: ['websocket'],
 });
 
 @Component({
@@ -44,6 +45,7 @@ export default class Game extends Vue {
     socket.io.opts.query = { token: this.token };
     socket.connect();
     socket.on('connect', () => {
+      console.log(socket);
       console.log('Connected to server...');
       socket.on('update', (data) => {
         this.data = data;

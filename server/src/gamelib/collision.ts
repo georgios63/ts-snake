@@ -18,20 +18,16 @@ class Collision {
   }
 
   public evaluateCollision = () => {
-    const filteredColliders = this.registeredColliders
-      .filter((collider) => !!(collider.ref.onCollision));
-
-    filteredColliders.forEach((collider) => this.checkForCollision(collider));
-  }
-
-  private checkForCollision = (collider) => {
-    const externalColliders = this.registeredColliders
-      .filter((externalCollider) => externalCollider !== collider);
-
-    externalColliders
-      .forEach((externalCollider) => this.checkExternalCollisions(collider, externalCollider));
-
-    this.checkInternalCollisions(collider);
+    this.registeredColliders.forEach((self) => {
+      if (!self.ref.onCollision) return;
+      this.registeredColliders.forEach((other) => {
+        if (self === other) {
+          this.checkInternalCollisions(self);
+          return;
+        }
+        this.checkExternalCollisions(self, other);
+      });
+    });
   }
 
   private checkInternalCollisions = (collider) => {
@@ -79,10 +75,5 @@ class Collision {
     return hasHorizontalOverlap && hasVerticalOverlap;
   }
 }
-
-/**
- * r1: x = 300, width: 100,
- * r2: x = 350, width: 10,
- */
 
 export default new Collision();

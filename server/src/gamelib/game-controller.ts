@@ -30,9 +30,6 @@ export default class GameController {
 
   public afterUpdate = () => {
     Collision.evaluateCollision();
-    if (this.fruit != null && this.fruit.isEaten) {
-      this.generateFruit();
-    }
 
     const players = Object.values(this.players);
     if (players.length) {
@@ -41,6 +38,10 @@ export default class GameController {
         player: playerPosition,
         fruit: this.fruit.position,
       });
+    }
+
+    if (this.fruit != null && this.fruit.isEaten) {
+      this.generateFruit();
     }
   }
 

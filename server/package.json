@@ -4,7 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "start:dev": "NODE_ENV=development nodemon",
+    "start": "NODE_ENV=development nodemon",
     "lint": "clear && eslint --ext ts src/*",
     "typecheck": "tsc --noEmit --watch",
     "test": "jest --watch",
