@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import type { InstanceReference } from './types';
 
 export default class Interval {
@@ -33,9 +34,9 @@ export default class Interval {
     const averageDelta = deltaTimes.reduce((t, v) => t + v) / deltaTimes.length;
 
     console.log('\n======== TIMES ========');
-    console.log('EXECUTION:', averageExecution.toFixed(2));
-    console.log('DELTA:', averageDelta.toFixed(2));
-    console.log('TICKRATE:', (1000 / averageDelta).toFixed(2));
+    console.log('EXECUTION:', `${averageExecution.toFixed(2)}ms`);
+    console.log('DELTA:', `${averageDelta.toFixed(2)}ms`);
+    console.log('TICKRATE:', (1000 / averageDelta).toFixed(2), 'per second.');
     console.log('=======================\n');
   }
 

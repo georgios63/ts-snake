@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* eslint-disable no-new */
 import { GameInstance } from '@/core';
 import { Entity, GameSettings } from '@/core/types';
@@ -10,7 +11,7 @@ export default class TestInstance extends GameInstance {
   constructor(settings: GameSettings) {
     super(settings);
 
-    const n = 10_000; // ? Number of dynamic entities
+    const n = 200_000; // ? Number of dynamic entities
 
     // ? Dynamic Entities
     for (let i = 0; i < n; i += 1) {
@@ -19,7 +20,7 @@ export default class TestInstance extends GameInstance {
     }
 
     // ? Static Collider Entities
-    for (let i = 0; i < n * 20; i += 1) {
+    for (let i = 0; i < n * 0; i += 1) {
       const staticCollider = new StaticCollider(this.id);
       this.entity.set(staticCollider.id, staticCollider);
     }
@@ -39,6 +40,7 @@ export default class TestInstance extends GameInstance {
 
   public showStats = () => {
     this.interval.showAverages();
+    console.log('collision iterations:', this.collision.iterations);
     this.timeoutId = setTimeout(() => this.showStats(), 1000);
   }
 

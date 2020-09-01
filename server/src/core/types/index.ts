@@ -18,4 +18,4 @@ export { InstanceReference, GameSettings } from './instance';
 
 export { Interval } from './interval';
 
-export { Rect2D } from './shapes';
+export { Rect2D, Point, Box } from './shapes';

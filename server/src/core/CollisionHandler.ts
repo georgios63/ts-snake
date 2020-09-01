@@ -8,6 +8,9 @@ export default class CollisionHandler {
   private registeredColliders: Map<string, RegisteredCollider> = new Map();
   private activeColliders: Map<string, RegisteredCollider> = new Map();
 
+  // * Testing purposes
+  public iterations = 0;
+
   public get size() {
     return this.registeredColliders.size;
   }
@@ -32,6 +35,7 @@ export default class CollisionHandler {
   }
 
   public evaluate = () => {
+    this.iterations = 0;
     this.activeColliders.forEach((collider) => {
       this.checkCollision(collider);
     });
@@ -47,6 +51,7 @@ export default class CollisionHandler {
   private checkCollision = (collider: RegisteredCollider) => {
     this.registeredColliders.forEach((externalCollider) => {
       if (externalCollider === collider) return;
+      this.iterations += 1;
 
       // *  for loops appears to perform better than a forEach loop
       for (let i = 0; i < collider.mesh.length; i += 1) {
@@ -62,20 +67,9 @@ export default class CollisionHandler {
     });
   }
 
-  private isColliding = (rect1: Rect2D, rect2: Rect2D) => {
-    let hasHorizontalOverlap = false;
-    let hasVerticalOverlap = false;
-
-    if (
-      (rect1.x <= rect2.x && (rect1.x + rect1.width) >= rect2.x)
-      || (rect2.x <= rect1.x && (rect2.x + rect2.width) >= rect1.x)
-    ) hasHorizontalOverlap = true;
-
-    if (
-      (rect1.y <= rect2.y && (rect1.y + rect1.height) >= rect2.y)
-      || (rect2.y <= rect1.y && (rect2.y + rect2.height) >= rect1.y)
-    ) hasVerticalOverlap = true;
-
-    return hasHorizontalOverlap && hasVerticalOverlap;
+  private isColliding = (r1: Rect2D, r2: Rect2D) => {
+    if (r1.x.max < r2.x.min || r2.x.min < r1.x.min) return false;
+    if (r1.y.max < r2.y.min || r2.y.min < r1.y.max) return false;
+    return true;
   }
 }

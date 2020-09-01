@@ -11,13 +11,18 @@ export default class Player extends Entity {
 
   constructor(instanceId: string, parentId?: string) {
     super(instanceId, parentId);
-    this.registerHooks();
-    this.mesh = [new Shapes.Rect2D(50, 50, 75, 15)];
+
+    const p1 = new Shapes.Point(Math.random() * 1024, Math.random() * 720);
+    const p2 = new Shapes.Point(p1.x + 75, p1.y + 15);
+
+    this.mesh = [new Shapes.Rect2D(p1, p2)];
     this.collider = new Collider(this, this.mesh);
+
+    this.registerHooks();
   }
 
   public update = (deltaTime: number) => {
-    const x = 5 / deltaTime;
+    const parent = this.getParent();
   }
 
   public onCollision = (entityId: string) => {
