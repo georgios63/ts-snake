@@ -1,21 +1,18 @@
-export {
-  Entity,
-  EntityTree,
-  Hooks,
-  Update,
-} from './entity';
+export type Rect = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
 
-export {
-  CollisionHandler,
-  Collider,
-  OnCollision,
-  RegisteredCollider,
-} from './collision';
+export type DirectionRange = 0 | 1 | -1;
 
-export { GenericFunction } from './generic';
+export type Direction = {
+  x: DirectionRange;
+  y: DirectionRange;
+};
 
-export { InstanceReference, GameSettings } from './instance';
-
-export { Interval } from './interval';
-
-export { Rect2D, Point, Box } from './shapes';
+export type Part = {
+  direction: Direction;
+  rect: Rect;
+}

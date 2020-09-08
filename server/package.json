@@ -7,8 +7,7 @@
     "start": "NODE_ENV=development nodemon",
     "lint": "clear && eslint --ext ts src/*",
     "typecheck": "tsc --noEmit --watch",
-    "test": "jest --watch",
-    "x": "ts-node src/gamelib/game-controller.ts"
+    "test": "jest --watch"
   },
   "devDependencies": {
     "@types/express": "^4.17.7",
