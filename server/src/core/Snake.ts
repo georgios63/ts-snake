@@ -6,6 +6,7 @@ export default class Snake {
   public parts: Array<Part> = [];
 
   private inputQueue: Array<Direction> = [];
+  private growthSize = 0;
 
   constructor(initialPosition: Rect2D) {
     this.createPart(initialPosition, { x: 1, y: 0 });
@@ -29,15 +30,12 @@ export default class Snake {
     this.inputQueue.push(direction);
   }
 
+  public grow = (growthSize: number) => {
+    this.growthSize += growthSize;
+  }
+
   public move = (distance: number) => {
     if (this.inputQueue.length) this.updateDirection();
-
-    const { head, tail } = this;
-    if (head === tail) {
-      head.rect.x += head.direction.x * distance;
-      head.rect.y += head.direction.y * distance;
-      return;
-    }
 
     this.updateHeadPosition(distance);
     this.updateTailPosition(distance);
@@ -45,39 +43,29 @@ export default class Snake {
 
   private updateHeadPosition = (distance: number) => {
     const { head } = this;
+    const [coordinate, length] = head.direction.x ? ['x', 'width'] : ['y', 'height'];
 
-    if (head.direction.x !== 0) {
-      head.rect.width += distance;
-      if (head.direction.x < 0) head.rect.x -= distance;
-    }
-    if (head.direction.y !== 0) {
-      head.rect.height += distance;
-      if (head.direction.y < 0) head.rect.y -= distance;
-    }
+    head.rect[length] += distance;
+    if (head.direction[coordinate] < 0) head.rect[coordinate] -= distance;
   }
 
   private updateTailPosition = (distance: number) => {
     const { tail } = this;
+    const [coordinate, length] = tail.direction.x ? ['x', 'width'] : ['y', 'height'];
 
-    if (tail.direction.x !== 0) {
-      tail.rect.width -= distance;
-      if (tail.direction.x > 0) tail.rect.x += distance;
-    }
-    if (tail.direction.y !== 0) {
-      tail.rect.height -= distance;
-      if (tail.direction.y > 0) tail.rect.y += distance;
-    }
+    const computedDistance = Math.max(0, distance - this.growthSize);
+    this.growthSize = Math.max(0, this.growthSize - distance);
+
+    tail.rect[length] -= computedDistance;
+    if (tail.direction[coordinate] > 0) tail.rect[coordinate] += computedDistance;
 
     this.applyExcessDistanceToNextPart();
   }
 
   private applyExcessDistanceToNextPart = () => {
     const { tail } = this;
-    const partLength = tail.rect.width > tail.rect.height
-      ? tail.rect.height
-      : tail.rect.width;
 
-    const excessDistance = SNAKE_WIDTH - partLength;
+    const excessDistance = SNAKE_WIDTH - Math.min(tail.rect.width, tail.rect.height);
     if (!excessDistance) return;
 
     this.parts.pop();

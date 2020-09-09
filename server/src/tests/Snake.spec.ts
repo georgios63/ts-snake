@@ -205,7 +205,7 @@ describe('Snake movement test suite', () => {
     expect(snake.parts.map((part: Part) => part.rect)).toEqual(expected);
   });
 
-  it('Remove tail the moment it reach the previous head origin', () => {
+  it('Remove tail the moment it reaches the previous head origin', () => {
     snake = new Snake(new Rect2D(origin.x, origin.y, SNAKE_WIDTH * 2, SNAKE_WIDTH));
     overrideInitialDirection(snake, direction.left);
 
@@ -215,6 +215,46 @@ describe('Snake movement test suite', () => {
     const headRect = new Rect2D(origin.x, origin.y + 5, SNAKE_WIDTH, SNAKE_WIDTH * 2);
 
     const expected = [headRect];
+
+    expect(snake.parts.map((part: Part) => part.rect)).toEqual(expected);
+  });
+
+  it('Grows while only containing a single part', () => {
+    snake = new Snake(new Rect2D(origin.x, origin.y, 30, SNAKE_WIDTH));
+    snake.grow(10);
+    snake.move(15);
+
+    const headRect = new Rect2D(origin.x + 5, origin.y, 40, SNAKE_WIDTH);
+
+    const expected = [headRect];
+
+    expect(snake.parts.map((part: Part) => part.rect)).toEqual(expected);
+  });
+
+  it('Grows only the movement distance when distance is less than growth value', () => {
+    snake = new Snake(new Rect2D(origin.x, origin.y, 30, SNAKE_WIDTH));
+    snake.grow(10);
+    snake.move(7);
+
+    const headRect = new Rect2D(origin.x, origin.y, 37, SNAKE_WIDTH);
+
+    const expected = [headRect];
+
+    expect(snake.parts.map((part: Part) => part.rect)).toEqual(expected);
+  });
+
+  it('Grows while containing multiple parts', () => {
+    snake = new Snake(new Rect2D(origin.x, origin.y, 30, SNAKE_WIDTH));
+    overrideInitialDirection(snake, direction.left);
+
+    snake.addDirection(direction.down);
+    snake.grow(10);
+    snake.move(15);
+
+    const headRect = new Rect2D(origin.x, origin.y, SNAKE_WIDTH, SNAKE_WIDTH + 15);
+    const tailRect = new Rect2D(origin.x, origin.y, 25, SNAKE_WIDTH);
+
+    const expected = [headRect, tailRect];
 
     expect(snake.parts.map((part: Part) => part.rect)).toEqual(expected);
   });
