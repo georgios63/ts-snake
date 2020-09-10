@@ -1,18 +1,16 @@
 import { Rect2D, Collision } from '@/core';
 
-/**
- * Collider:
- * - shape / rectangulars (to detect IF it collides)
- * - name (identifier for the collider)
- * - callback (to pass the information 'the collision between 2 entities'
- * of the outcome where is needed)
- */
-
-function makeMockCollider(shape: Array<Rect2D>, name: string, callback?: Function) {
+function makeMockCollider(
+  id: string,
+  type: string,
+  shape: Array<Rect2D>,
+  onCollision?: Function,
+) {
   return {
+    id,
+    type,
     shape,
-    name,
-    callback,
+    onCollision,
   };
 }
 
@@ -31,7 +29,7 @@ describe('Collision test suite', () => {
     expect(Collision.isColliding(r1, r2)).toBe(false);
   });
 
-  it('Does call the collider\'s callback when it collides', () => {
+  it('Calls the collider\'s callback with the id and type of collision target', () => {
     const fieldSize = 500;
 
     const rectCollection1 = [new Rect2D(8, 50, 30, 10), new Rect2D(8, 50, 10, 20)];
@@ -42,24 +40,34 @@ describe('Collision test suite', () => {
       new Rect2D(fieldSize - 10, 0, 10, fieldSize), // right
     ];
 
-    const mockCallback = jest.fn((shape: Array<Rect2D>) => {});
-    const c1 = makeMockCollider(rectCollection1, 'c1', mockCallback);
-    const c2 = makeMockCollider(rectCollection2, 'c2');
+    const mockCallback = jest.fn(({ id, type }) => {});
+    const c1 = makeMockCollider('0', 'c1', rectCollection1, mockCallback);
+    const c2 = makeMockCollider('1', 'c2', rectCollection2);
 
     Collision.checkForCollision(c1, c2);
 
     expect(mockCallback.mock.calls.length).toBe(1);
-    expect(mockCallback.mock.calls[0][0]).toEqual(c2.shape);
+    expect(mockCallback.mock.calls[0][0]).toEqual({ id: c2.id, type: c2.type });
+  });
+
+  it('Stores all type of colliders', () => {
+    const collidersCollection = [
+      makeMockCollider('0', 'Snake', [new Rect2D(0, 0, 30, 10)], jest.fn(() => {})),
+      makeMockCollider('1', 'Snake', [new Rect2D(10, 0, 30, 10)], jest.fn(() => {})),
+      makeMockCollider('2', 'Fruit', [new Rect2D(0, 0, 5, 5)], jest.fn(() => {})),
+    ];
+
+    const cb0 = collidersCollection[0].onCollision as jest.Mock;
+    const cb1 = collidersCollection[1].onCollision as jest.Mock;
+    const cb2 = collidersCollection[2].onCollision as jest.Mock;
+
+    const collectionCopy = [...collidersCollection];
+
+    Collision.evaluateCollisions(collidersCollection);
+
+    expect(cb0.mock.calls.length).toBe(2);
+    expect(cb1.mock.calls.length).toBe(1);
+    expect(cb2.mock.calls.length).toBe(1);
+    expect(collidersCollection).toEqual(collectionCopy);
   });
 });
-
-it('fails', () => {
-  expect(false).toBe(true);
-});
-
-/**
- * fruit -> if collides, -> isEaten,
- * player / snake -> needs to know what it collided with (
- *   can be self, boundary, other snake, fruit, power-up
- * )
- */

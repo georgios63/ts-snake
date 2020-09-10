@@ -1,29 +1,31 @@
 import type { Rect } from './types';
 
-/**
- * 1. Has to track which objects are colliding
- * 2. Has to have a way of making the collisions
- *    known to code outside the class
- *
- * constraints:
- * 1. Doesn't duplicate collisions (i.e collider A can only collide with collider B ONCE)
- */
 type Collider = {
-  name: string;
+  id: string;
+  type: string;
   shape: Array<Rect>;
-  callback?: Function;
+  onCollision?: Function;
 }
 
 export default class Collision {
-  static checkForCollision = (c1: Collider, c2: Collider) => {
-    for (let c1ShapeIndex = 0; c1ShapeIndex < c1.shape.length; c1ShapeIndex += 1) {
-      for (let c2ShapeIndex = 0; c2ShapeIndex < c2.shape.length; c2ShapeIndex += 1) {
-        const r1 = c1.shape[c1ShapeIndex];
-        const r2 = c2.shape[c2ShapeIndex];
+  static evaluateCollisions = (colliders: Array<Collider>) => {
+    const collidersList = [...colliders];
+
+    while (collidersList.length > 1) {
+      const c1 = collidersList.shift()!;
+      collidersList.forEach((c2) => Collision.checkForCollision(c1, c2));
+    }
+  }
+
+  static checkForCollision = (cA: Collider, cB: Collider) => {
+    for (let indexA = 0; indexA < cA.shape.length; indexA += 1) {
+      for (let indexB = 0; indexB < cB.shape.length; indexB += 1) {
+        const r1 = cA.shape[indexA];
+        const r2 = cB.shape[indexB];
 
         if (Collision.isColliding(r1, r2)) {
-          if (c1.callback) c1.callback(c2.shape);
-          if (c2.callback) c2.callback(c1.shape);
+          if (cA.onCollision) cA.onCollision({ id: cB.id, type: cB.type });
+          if (cB.onCollision) cB.onCollision({ id: cA.id, type: cA.type });
           return;
         }
       }

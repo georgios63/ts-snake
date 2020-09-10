@@ -4,3 +4,6 @@ export { default as Snake } from './Snake';
 export { default as Player } from './Player';
 export { default as Rect2D } from './Rect';
 export { default as Collision } from './Collision';
+export { default as Fruit } from './Fruit';
+export { default as Field } from './Field';
+export { default as Interval } from './Interval';
